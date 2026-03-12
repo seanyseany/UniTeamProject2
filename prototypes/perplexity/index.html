@@ -1,1 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UniGroup — Demo Collaboration Platform</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; background: #f5f5f5; color: #333; }
+  header { background: #004aad; color: white; padding: 10px 20px; text-align: center; }
+  main { padding: 20px; }
+  .screen { display: none; }
+  .active { display: block; }
+  input, textarea, button { margin: 5px 0; padding: 8px; width: 100%; box-sizing: border-box; }
+  .card { background: white; border: 1px solid #ccc; padding: 15px; border-radius: 5px; margin-bottom: 10px; }
+  .flex { display: flex; gap: 10px; }
+  .column { flex: 1; }
+  nav button { margin: 5px; }
+  .chat-box, .task-board, .file-sharing, .ai-summary { margin-top: 20px; }
+</style>
+</head>
+<body>
 
+<header>
+  <h1>UniGroup</h1>
+</header>
+
+<main>
+
+  <!-- LOGIN SCREEN -->
+  <section id="login" class="screen active">
+    <h2>Login</h2>
+    <input type="text" placeholder="Student Email">
+    <input type="password" placeholder="Password">
+    <button onclick="showScreen('dashboard')">Login</button>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="dashboard" class="screen">
+    <h2>Group Dashboard</h2>
+    <p>Welcome to your group workspace.</p>
+    <nav>
+      <button onclick="showScreen('chat')">Group Chat</button>
+      <button onclick="showScreen('tasks')">Task Board</button>
+      <button onclick="showScreen('files')">File Sharing</button>
+      <button onclick="showScreen('summary')">AI Meeting Summary</button>
+      <button onclick="showScreen('login')">Logout</button>
+    </nav>
+  </section>
+
+  <!-- GROUP CHAT -->
+  <section id="chat" class="screen">
+    <h2>Group Chat</h2>
+    <div class="chat-box card" style="height:200px;">
+      <p><b>Alice:</b> Hey team, ready for our meeting?</p>
+      <p><b>Bob:</b> Yep, let's finalize our sections today.</p>
+    </div>
+    <input type="text" placeholder="Type a message...">
+    <button>Send</button>
+    <button onclick="showScreen('dashboard')">Back</button>
+  </section>
+
+  <!-- TASK MANAGEMENT BOARD -->
+  <section id="tasks" class="screen">
+    <h2>Task Management Board</h2>
+    <div class="flex">
+      <div class="column card">
+        <h3>To Do</h3>
+        <p>Write research section</p>
+        <p>Create slides</p>
+      </div>
+      <div class="column card">
+        <h3>In Progress</h3>
+        <p>Data analysis</p>
+      </div>
+      <div class="column card">
+        <h3>Done</h3>
+        <p>Project proposal</p>
+      </div>
+    </div>
+    <button>Add New Task</button>
+    <button onclick="showScreen('dashboard')">Back</button>
+  </section>
+
+  <!-- FILE SHARING -->
+  <section id="files" class="screen">
+    <h2>File Sharing</h2>
+    <div class="file-sharing card">
+      <p>Uploaded Files:</p>
+      <ul>
+        <li>report_draft.docx</li>
+        <li>data.csv</li>
+      </ul>
+      <input type="file">
+      <button>Upload</button>
+    </div>
+    <button onclick="showScreen('dashboard')">Back</button>
+  </section>
+
+  <!-- AI MEETING SUMMARY -->
+  <section id="summary" class="screen">
+    <h2>AI Meeting Summary</h2>
+    <div class="ai-summary card">
+      <p><b>Latest Summary:</b></p>
+      <p>Topics discussed: dataset structure, task distribution, and next steps.</p>
+      <p>Next meeting: Tuesday 3 PM.</p>
+    </div>
+    <textarea rows="4" placeholder="Add notes..."></textarea>
+    <button>Generate New Summary</button>
+    <button onclick="showScreen('dashboard')">Back</button>
+  </section>
+
+</main>
+
+<script>
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+</script>
+
+</body>
+</html>
