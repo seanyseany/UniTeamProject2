@@ -1,0 +1,1386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GroupSync – University Collaboration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f2ee;
+    --surface: #ffffff;
+    --surface2: #faf8f5;
+    --border: #e8e2d9;
+    --border2: #d4ccc0;
+    --text: #1a1714;
+    --text2: #6b6359;
+    --text3: #9e958a;
+    --accent: #2d6a4f;
+    --accent-light: #e8f5ee;
+    --accent2: #d4541a;
+    --accent2-light: #fdf0e8;
+    --blue: #2563a8;
+    --blue-light: #e8f0fa;
+    --yellow: #b5850a;
+    --yellow-light: #fef8e7;
+    --purple: #6b3fa0;
+    --purple-light: #f3eeff;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.10), 0 1px 4px rgba(0,0,0,0.06);
+    --radius: 10px;
+    --radius-sm: 6px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: flex; }
+
+  /* ── LOGIN ── */
+  #login-screen {
+    min-height: 100vh;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg);
+    flex-direction: column;
+  }
+  .login-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 48px 44px;
+    width: 400px;
+    box-shadow: var(--shadow-md);
+  }
+  .login-logo {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 32px;
+  }
+  .logo-mark {
+    width: 36px; height: 36px; background: var(--accent);
+    border-radius: 8px; display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 16px;
+  }
+  .login-logo span { font-size: 20px; font-weight: 700; color: var(--text); }
+  .login-logo small { font-size: 12px; color: var(--text3); display: block; }
+  h2.login-title { font-size: 22px; font-weight: 600; margin-bottom: 6px; }
+  .login-sub { color: var(--text2); font-size: 13px; margin-bottom: 28px; }
+  .form-group { margin-bottom: 18px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 6px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .form-group input {
+    width: 100%; padding: 10px 14px;
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    background: var(--surface2);
+    font-family: 'Sora', sans-serif;
+    font-size: 14px; color: var(--text);
+    outline: none; transition: border 0.2s;
+  }
+  .form-group input:focus { border-color: var(--accent); background: white; }
+  .btn-primary {
+    width: 100%; padding: 11px;
+    background: var(--accent); color: white;
+    border: none; border-radius: var(--radius-sm);
+    font-family: 'Sora', sans-serif; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: opacity 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.88; }
+  .login-footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--text3); }
+  .login-footer a { color: var(--accent); cursor: pointer; text-decoration: none; }
+  .demo-hint {
+    margin-top: 20px; padding: 12px 14px;
+    background: var(--accent-light); border-radius: var(--radius-sm);
+    font-size: 12px; color: var(--accent);
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ── APP SHELL ── */
+  #app-screen {
+    height: 100vh; flex-direction: row; overflow: hidden;
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px; flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 0;
+  }
+  .sidebar-header {
+    padding: 18px 16px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-logo { display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo .logo-mark { width: 28px; height: 28px; font-size: 13px; border-radius: 6px; }
+  .sidebar-logo span { font-size: 15px; font-weight: 700; }
+  .group-pill {
+    margin-top: 12px; padding: 8px 10px;
+    background: var(--accent-light); border-radius: var(--radius-sm);
+    font-size: 12px; color: var(--accent); font-weight: 600;
+  }
+  .group-pill small { display: block; font-weight: 400; color: var(--text2); font-size: 11px; margin-top: 1px; }
+
+  .sidebar-nav { flex: 1; padding: 12px 10px; overflow-y: auto; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--text3);
+    padding: 6px 8px 4px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 13px; font-weight: 500; color: var(--text2);
+    transition: all 0.15s; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); }
+  .nav-item .nav-icon { width: 16px; text-align: center; font-size: 15px; }
+  .nav-badge {
+    margin-left: auto; background: var(--accent2); color: white;
+    font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700;
+  }
+
+  .sidebar-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .user-chip {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .avatar.sm { width: 26px; height: 26px; font-size: 10px; }
+  .avatar.xs { width: 22px; height: 22px; font-size: 9px; }
+  .user-chip .user-info { flex: 1; min-width: 0; }
+  .user-chip .user-name { font-size: 12px; font-weight: 600; }
+  .user-chip .user-role { font-size: 11px; color: var(--text3); }
+
+  /* MAIN CONTENT */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .top-bar {
+    padding: 14px 24px; border-bottom: 1px solid var(--border);
+    background: var(--surface); display: flex; align-items: center; gap: 16px;
+  }
+  .top-bar h1 { font-size: 16px; font-weight: 700; flex: 1; }
+  .top-bar .actions { display: flex; align-items: center; gap: 8px; }
+  .btn-sm {
+    padding: 7px 14px; border-radius: var(--radius-sm);
+    font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s; border: none;
+  }
+  .btn-outline { background: transparent; border: 1px solid var(--border2); color: var(--text2); }
+  .btn-outline:hover { background: var(--surface2); }
+  .btn-accent { background: var(--accent); color: white; }
+  .btn-accent:hover { opacity: 0.88; }
+  .btn-ghost { background: transparent; border: 1px solid transparent; color: var(--text2); }
+  .btn-ghost:hover { background: var(--surface2); }
+  .content-area { flex: 1; overflow-y: auto; padding: 24px; }
+
+  /* ── PAGES ── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* DASHBOARD */
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 18px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; color: var(--text3);
+    margin-bottom: 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title a { color: var(--accent); font-weight: 600; cursor: pointer; font-size: 11px; }
+
+  /* Members card */
+  .member-list { display: flex; flex-direction: column; gap: 10px; }
+  .member-row { display: flex; align-items: center; gap: 10px; }
+  .member-row .name { font-size: 13px; font-weight: 500; flex: 1; }
+  .member-row .role-tag {
+    font-size: 10px; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+  }
+  .tag-lead { background: var(--accent-light); color: var(--accent); }
+  .tag-member { background: var(--surface2); color: var(--text2); }
+  .online-dot { width: 7px; height: 7px; border-radius: 50%; background: #22c55e; flex-shrink: 0; }
+  .offline-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); flex-shrink: 0; }
+
+  /* Deadlines */
+  .deadline-list { display: flex; flex-direction: column; gap: 10px; }
+  .deadline-item { display: flex; align-items: center; gap: 12px; }
+  .deadline-date {
+    width: 44px; height: 44px; border-radius: var(--radius-sm);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .deadline-date.urgent { background: #fee2e2; }
+  .deadline-date.soon { background: var(--yellow-light); }
+  .deadline-date.ok { background: var(--accent-light); }
+  .deadline-date .day { font-size: 15px; font-weight: 700; line-height: 1; }
+  .deadline-date .mon { font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+  .deadline-date.urgent .day, .deadline-date.urgent .mon { color: #dc2626; }
+  .deadline-date.soon .day, .deadline-date.soon .mon { color: var(--yellow); }
+  .deadline-date.ok .day, .deadline-date.ok .mon { color: var(--accent); }
+  .deadline-info .title { font-size: 13px; font-weight: 500; }
+  .deadline-info .sub { font-size: 11px; color: var(--text3); }
+
+  /* Activity */
+  .activity-list { display: flex; flex-direction: column; gap: 12px; }
+  .activity-item { display: flex; gap: 10px; align-items: flex-start; }
+  .activity-item .activity-text { font-size: 12px; line-height: 1.5; }
+  .activity-item .activity-text strong { font-weight: 600; }
+  .activity-item .activity-time { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+  /* Stats row */
+  .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+  .stat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 18px;
+    box-shadow: var(--shadow);
+  }
+  .stat-card .stat-num { font-size: 26px; font-weight: 700; }
+  .stat-card .stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+  .stat-card .stat-sub { font-size: 10px; color: var(--text3); }
+  .col-accent { color: var(--accent); }
+  .col-blue { color: var(--blue); }
+  .col-yellow { color: var(--yellow); }
+  .col-red { color: #dc2626; }
+
+  /* CHAT */
+  .chat-layout { display: flex; height: 100%; gap: 0; }
+  .chat-area {
+    flex: 1; display: flex; flex-direction: column;
+    background: var(--surface); border-radius: var(--radius);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .chat-header {
+    padding: 14px 18px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .chat-header h3 { font-size: 14px; font-weight: 600; }
+  .chat-header .online-count { font-size: 12px; color: var(--text3); }
+  .messages {
+    flex: 1; overflow-y: auto; padding: 18px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .msg { display: flex; gap: 10px; align-items: flex-start; }
+  .msg .bubble {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 4px 10px 10px 10px;
+    padding: 10px 14px; max-width: 520px;
+  }
+  .msg .msg-meta { font-size: 11px; margin-bottom: 4px; }
+  .msg .msg-meta .sender { font-weight: 600; }
+  .msg .msg-meta .time { color: var(--text3); margin-left: 6px; }
+  .msg .msg-text { font-size: 13px; line-height: 1.55; }
+  .msg.own { flex-direction: row-reverse; }
+  .msg.own .bubble {
+    background: var(--accent-light); border-color: #c8e6d4;
+    border-radius: 10px 4px 10px 10px;
+  }
+  .msg .file-attach {
+    margin-top: 8px; padding: 8px 10px;
+    background: white; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); display: flex; align-items: center; gap: 8px;
+    font-size: 12px; cursor: pointer;
+  }
+  .chat-input-area {
+    padding: 14px 18px; border-top: 1px solid var(--border);
+    display: flex; gap: 10px; align-items: flex-end;
+  }
+  .chat-input {
+    flex: 1; padding: 10px 14px; min-height: 42px; max-height: 120px;
+    border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    background: var(--surface2); font-family: 'Sora', sans-serif;
+    font-size: 13px; resize: none; outline: none; color: var(--text);
+  }
+  .chat-input:focus { border-color: var(--accent); background: white; }
+  .chat-toolbar { display: flex; gap: 4px; align-items: center; }
+  .icon-btn {
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    border: 1px solid var(--border2); background: white; border-radius: var(--radius-sm);
+    cursor: pointer; font-size: 14px; color: var(--text2); transition: all 0.15s;
+  }
+  .icon-btn:hover { background: var(--surface2); color: var(--text); }
+  .send-btn {
+    width: 36px; height: 36px; background: var(--accent); color: white;
+    border: none; border-radius: var(--radius-sm); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .send-btn:hover { opacity: 0.88; }
+  .ai-summary-btn {
+    padding: 7px 12px; background: var(--purple-light);
+    color: var(--purple); border: 1px solid #d0b8f5;
+    border-radius: var(--radius-sm); font-size: 11px; font-weight: 600;
+    cursor: pointer; display: flex; align-items: center; gap: 5px;
+    transition: all 0.15s; font-family: 'Sora', sans-serif;
+    flex-shrink: 0;
+  }
+  .ai-summary-btn:hover { background: #eaddff; }
+
+  /* TASKS / KANBAN */
+  .kanban { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .kanban-col {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px;
+  }
+  .kanban-col-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+  }
+  .col-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .col-label { font-size: 12px; font-weight: 700; }
+  .col-count {
+    margin-left: auto; background: var(--border);
+    font-size: 10px; padding: 1px 6px; border-radius: 10px;
+    font-weight: 600; color: var(--text2);
+  }
+  .task-cards { display: flex; flex-direction: column; gap: 8px; }
+  .task-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 12px;
+    cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+  }
+  .task-card:hover { border-color: var(--border2); box-shadow: var(--shadow-md); }
+  .task-card .task-tag {
+    display: inline-block; font-size: 9px; font-weight: 700;
+    padding: 2px 7px; border-radius: 10px; margin-bottom: 6px;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .task-card .task-title { font-size: 12px; font-weight: 600; margin-bottom: 8px; line-height: 1.4; }
+  .task-card .task-desc { font-size: 11px; color: var(--text2); margin-bottom: 10px; line-height: 1.45; }
+  .task-card .task-footer { display: flex; align-items: center; gap: 6px; }
+  .task-card .task-due { font-size: 10px; color: var(--text3); margin-left: auto; }
+  .priority-high { background: #fee2e2; color: #dc2626; }
+  .priority-med { background: var(--yellow-light); color: var(--yellow); }
+  .priority-low { background: var(--accent-light); color: var(--accent); }
+  .add-task-btn {
+    width: 100%; margin-top: 10px; padding: 8px;
+    border: 1.5px dashed var(--border2); border-radius: var(--radius-sm);
+    background: transparent; font-family: 'Sora', sans-serif;
+    font-size: 12px; color: var(--text3); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-task-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+
+  /* FILES */
+  .files-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .file-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    display: flex; flex-direction: column; gap: 10px;
+    cursor: pointer; transition: all 0.15s; box-shadow: var(--shadow);
+  }
+  .file-card:hover { border-color: var(--border2); box-shadow: var(--shadow-md); }
+  .file-icon {
+    width: 44px; height: 44px; border-radius: var(--radius-sm);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+  }
+  .file-icon.pdf { background: #fee2e2; }
+  .file-icon.doc { background: var(--blue-light); }
+  .file-icon.xls { background: var(--accent-light); }
+  .file-icon.ppt { background: var(--accent2-light); }
+  .file-icon.zip { background: var(--yellow-light); }
+  .file-name { font-size: 13px; font-weight: 600; line-height: 1.3; }
+  .file-meta { font-size: 11px; color: var(--text3); }
+  .file-uploader { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text2); }
+  .file-actions { display: flex; gap: 6px; margin-top: 4px; }
+  .file-action-btn {
+    padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600;
+    cursor: pointer; border: none; font-family: 'Sora', sans-serif; transition: all 0.15s;
+  }
+  .file-action-btn.dl { background: var(--accent-light); color: var(--accent); }
+  .file-action-btn.dl:hover { background: #c8e6d4; }
+  .upload-zone {
+    border: 2px dashed var(--border2); border-radius: var(--radius);
+    padding: 32px; text-align: center; color: var(--text3);
+    cursor: pointer; transition: all 0.15s; margin-bottom: 20px;
+  }
+  .upload-zone:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+  .upload-zone .upload-icon { font-size: 28px; margin-bottom: 8px; }
+  .upload-zone p { font-size: 13px; font-weight: 500; }
+  .upload-zone small { font-size: 11px; }
+
+  /* AI SUMMARY MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    display: none; align-items: center; justify-content: center;
+    z-index: 1000; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px;
+    width: 620px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    border: 1px solid var(--border);
+  }
+  .modal-header {
+    padding: 20px 24px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .modal-header h2 { font-size: 16px; font-weight: 700; flex: 1; }
+  .modal-close {
+    width: 28px; height: 28px; border-radius: 50%; background: var(--surface2);
+    border: 1px solid var(--border); cursor: pointer; display: flex;
+    align-items: center; justify-content: center; font-size: 16px; color: var(--text2);
+  }
+  .modal-body { padding: 20px 24px 24px; }
+  .ai-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; background: var(--purple-light);
+    border-radius: 20px; font-size: 11px; font-weight: 700; color: var(--purple);
+    margin-bottom: 18px;
+  }
+  .ai-badge::before { content: "✦"; font-size: 9px; }
+
+  .summary-section { margin-bottom: 20px; }
+  .summary-section h3 { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text3); margin-bottom: 10px; }
+  .summary-section ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+  .summary-section li {
+    display: flex; gap: 8px; font-size: 13px; line-height: 1.5;
+    padding: 8px 10px; border-radius: var(--radius-sm); background: var(--surface2);
+  }
+  .summary-section li::before { content: "•"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+  .action-item {
+    background: var(--accent-light) !important;
+  }
+  .action-item strong { color: var(--accent); }
+  .ai-input-label { font-size: 12px; font-weight: 600; color: var(--text2); margin-bottom: 8px; }
+  .ai-textarea {
+    width: 100%; padding: 12px; border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); font-family: 'Sora', sans-serif;
+    font-size: 13px; resize: vertical; min-height: 100px; outline: none;
+    background: var(--surface2); color: var(--text);
+  }
+  .ai-textarea:focus { border-color: var(--purple); background: white; }
+  .ai-generate-btn {
+    width: 100%; margin-top: 12px; padding: 11px;
+    background: var(--purple); color: white; border: none;
+    border-radius: var(--radius-sm); font-family: 'Sora', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .ai-generate-btn:hover { opacity: 0.88; }
+  .loading-dots { display: none; }
+  .loading-dots span {
+    display: inline-block; width: 6px; height: 6px;
+    background: white; border-radius: 50; margin: 0 2px;
+    animation: bounce 1.2s infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+
+  /* TASK MODAL */
+  .task-modal .modal-body { padding: 20px 24px; }
+  .task-detail-header { margin-bottom: 16px; }
+  .task-detail-header h3 { font-size: 18px; font-weight: 700; }
+  .task-meta-row { display: flex; gap: 16px; margin-bottom: 18px; flex-wrap: wrap; }
+  .task-meta-item { font-size: 12px; }
+  .task-meta-item .label { color: var(--text3); margin-bottom: 3px; }
+  .task-meta-item .value { font-weight: 600; }
+  .status-select {
+    padding: 5px 10px; border: 1px solid var(--border2); border-radius: var(--radius-sm);
+    font-family: 'Sora', sans-serif; font-size: 12px; font-weight: 600;
+    background: var(--surface2); cursor: pointer; outline: none; color: var(--text);
+  }
+  .divider { height: 1px; background: var(--border); margin: 16px 0; }
+  .comment-area { display: flex; gap: 8px; margin-top: 12px; }
+  .comment-input {
+    flex: 1; padding: 8px 12px; border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); font-family: 'Sora', sans-serif;
+    font-size: 13px; outline: none; background: var(--surface2); color: var(--text);
+  }
+
+  /* AVATARS COLOR */
+  .av1 { background: #2d6a4f; }
+  .av2 { background: #2563a8; }
+  .av3 { background: #6b3fa0; }
+  .av4 { background: #d4541a; }
+  .av5 { background: #b5850a; }
+
+  /* Misc */
+  .tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .progress-bar { height: 5px; background: var(--border); border-radius: 10px; overflow: hidden; margin-top: 4px; }
+  .progress-bar .fill { height: 100%; background: var(--accent); border-radius: 10px; transition: width 0.5s; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty-state .icon { font-size: 36px; margin-bottom: 10px; }
+  .empty-state p { font-size: 13px; }
+  hr { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+  .spinner {
+    display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    padding: 12px 18px; background: var(--text); color: white;
+    border-radius: var(--radius); font-size: 13px; font-weight: 500;
+    box-shadow: var(--shadow-md); z-index: 2000;
+    transform: translateY(80px); opacity: 0; transition: all 0.3s;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════════ -->
+<div id="login-screen" class="screen active">
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="logo-mark">GS</div>
+      <div>
+        <span>GroupSync</span>
+        <small>University Collaboration Platform</small>
+      </div>
+    </div>
+    <h2 class="login-title">Welcome back</h2>
+    <p class="login-sub">Sign in with your university credentials to access your groups.</p>
+    <div class="form-group">
+      <label>University Email</label>
+      <input type="email" id="login-email" value="alex.chen@university.edu" placeholder="you@university.edu">
+    </div>
+    <div class="form-group">
+      <label>Password</label>
+      <input type="password" id="login-pass" value="••••••••" placeholder="Your password">
+    </div>
+    <button class="btn-primary" onclick="doLogin()">Sign in to GroupSync</button>
+    <div class="login-footer">
+      Forgot password? <a>Reset via university portal</a>
+    </div>
+    <div class="demo-hint">
+      ✦ Demo credentials pre-filled — just click Sign in
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     APP SHELL
+═══════════════════════════════════════════ -->
+<div id="app-screen" class="screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">GS</div>
+        <span>GroupSync</span>
+      </div>
+      <div class="group-pill">
+        📚 CS3012 Group B
+        <small>Software Engineering Project</small>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item active" onclick="navTo('dashboard', this)">
+        <span class="nav-icon">⊞</span> Dashboard
+      </div>
+      <div class="nav-item" onclick="navTo('chat', this)">
+        <span class="nav-icon">💬</span> Group Chat
+        <span class="nav-badge">3</span>
+      </div>
+      <div class="nav-item" onclick="navTo('tasks', this)">
+        <span class="nav-icon">☑</span> Task Board
+      </div>
+      <div class="nav-item" onclick="navTo('files', this)">
+        <span class="nav-icon">📁</span> Files
+      </div>
+      <div style="margin-top: 16px;" class="nav-section-label">Tools</div>
+      <div class="nav-item" onclick="openAISummary()">
+        <span class="nav-icon">✦</span> AI Summary
+        <span class="nav-badge" style="background:var(--purple);">AI</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="user-chip">
+        <div class="avatar av1">AC</div>
+        <div class="user-info">
+          <div class="user-name">Alex Chen</div>
+          <div class="user-role">Group Lead · Online</div>
+        </div>
+        <span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="doLogout()">⎋</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+      <h1 id="page-title">Dashboard</h1>
+      <div class="actions" id="top-actions">
+        <button class="btn-sm btn-outline" onclick="openAISummary()">✦ AI Summary</button>
+        <button class="btn-sm btn-accent" onclick="showToast('Invite sent!')">+ Invite Member</button>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-area">
+
+      <!-- ── DASHBOARD PAGE ── -->
+      <div id="page-dashboard" class="page active">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-num col-blue">7</div>
+            <div class="stat-label">Active Tasks</div>
+            <div class="stat-sub">2 due this week</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num col-accent">3</div>
+            <div class="stat-label">Completed</div>
+            <div class="stat-sub">This sprint</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num col-yellow">2</div>
+            <div class="stat-label">Upcoming Deadlines</div>
+            <div class="stat-sub">Next 7 days</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num col-red">1</div>
+            <div class="stat-label">Overdue</div>
+            <div class="stat-sub">Needs attention</div>
+          </div>
+        </div>
+
+        <div class="dash-grid">
+
+          <!-- Members -->
+          <div class="card">
+            <div class="card-title">Group Members <a onclick="showToast('Member details expanded')">View all</a></div>
+            <div class="member-list">
+              <div class="member-row">
+                <div class="online-dot"></div>
+                <div class="avatar sm av1">AC</div>
+                <div class="name">Alex Chen</div>
+                <span class="role-tag tag-lead">Lead</span>
+              </div>
+              <div class="member-row">
+                <div class="online-dot"></div>
+                <div class="avatar sm av2">JM</div>
+                <div class="name">Jess Moore</div>
+                <span class="role-tag tag-member">Member</span>
+              </div>
+              <div class="member-row">
+                <div class="offline-dot"></div>
+                <div class="avatar sm av3">RP</div>
+                <div class="name">Ryan Patel</div>
+                <span class="role-tag tag-member">Member</span>
+              </div>
+              <div class="member-row">
+                <div class="online-dot"></div>
+                <div class="avatar sm av4">SO</div>
+                <div class="name">Sara O'Brien</div>
+                <span class="role-tag tag-member">Member</span>
+              </div>
+              <div class="member-row">
+                <div class="offline-dot"></div>
+                <div class="avatar sm av5">TN</div>
+                <div class="name">Tom Nguyen</div>
+                <span class="role-tag tag-member">Member</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Deadlines -->
+          <div class="card">
+            <div class="card-title">Upcoming Deadlines <a onclick="navTo('tasks',null)">Go to Tasks</a></div>
+            <div class="deadline-list">
+              <div class="deadline-item">
+                <div class="deadline-date urgent">
+                  <div class="day">14</div>
+                  <div class="mon">Mar</div>
+                </div>
+                <div class="deadline-info">
+                  <div class="title">System Design Report</div>
+                  <div class="sub">⚠ 2 days remaining</div>
+                </div>
+              </div>
+              <div class="deadline-item">
+                <div class="deadline-date soon">
+                  <div class="day">18</div>
+                  <div class="mon">Mar</div>
+                </div>
+                <div class="deadline-info">
+                  <div class="title">UI Prototype Submission</div>
+                  <div class="sub">6 days remaining</div>
+                </div>
+              </div>
+              <div class="deadline-item">
+                <div class="deadline-date ok">
+                  <div class="day">28</div>
+                  <div class="mon">Mar</div>
+                </div>
+                <div class="deadline-info">
+                  <div class="title">Final Code Review</div>
+                  <div class="sub">16 days remaining</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="card">
+            <div class="card-title">Recent Activity</div>
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="avatar xs av2">JM</div>
+                <div>
+                  <div class="activity-text"><strong>Jess Moore</strong> uploaded <em>system_design_v2.pdf</em></div>
+                  <div class="activity-time">10 min ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="avatar xs av4">SO</div>
+                <div>
+                  <div class="activity-text"><strong>Sara O'Brien</strong> moved "Database Schema" to <em>In Progress</em></div>
+                  <div class="activity-time">42 min ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="avatar xs av1">AC</div>
+                <div>
+                  <div class="activity-text"><strong>Alex Chen</strong> created AI summary of today's standup</div>
+                  <div class="activity-time">1 hr ago</div>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="avatar xs av3">RP</div>
+                <div>
+                  <div class="activity-text"><strong>Ryan Patel</strong> completed "API Endpoint Design"</div>
+                  <div class="activity-time">3 hrs ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress -->
+          <div class="card" style="grid-column: 1 / 3;">
+            <div class="card-title">Project Progress</div>
+            <div style="display:flex;flex-direction:column;gap:12px;">
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="font-weight:500;">System Design Report</span>
+                  <span style="color:var(--text3);">65%</span>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:65%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="font-weight:500;">Database Implementation</span>
+                  <span style="color:var(--text3);">40%</span>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:40%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="font-weight:500;">UI Prototype</span>
+                  <span style="color:var(--text3);">20%</span>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:20%"></div></div>
+              </div>
+              <div>
+                <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+                  <span style="font-weight:500;">Testing & QA</span>
+                  <span style="color:var(--text3);">5%</span>
+                </div>
+                <div class="progress-bar"><div class="fill" style="width:5%"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="card">
+            <div class="card-title">Quick Actions</div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <button class="btn-sm btn-accent" style="width:100%;padding:10px;" onclick="navTo('chat',null)">💬 Open Group Chat</button>
+              <button class="btn-sm btn-outline" style="width:100%;padding:10px;" onclick="navTo('tasks',null)">☑ View Task Board</button>
+              <button class="btn-sm btn-outline" style="width:100%;padding:10px;" onclick="navTo('files',null)">📁 Browse Files</button>
+              <button class="btn-sm" style="width:100%;padding:10px;background:var(--purple-light);color:var(--purple);border:1px solid #d0b8f5;" onclick="openAISummary()">✦ Generate AI Summary</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── CHAT PAGE ── -->
+      <div id="page-chat" class="page" style="height:calc(100vh - 110px);">
+        <div class="chat-area" style="height:100%;">
+          <div class="chat-header">
+            <span style="font-size:18px;">💬</span>
+            <div>
+              <h3># general</h3>
+              <div class="online-count">3 members online</div>
+            </div>
+            <div style="margin-left:auto;display:flex;gap:8px;">
+              <button class="ai-summary-btn" onclick="openAISummary()">✦ Summarise Chat</button>
+            </div>
+          </div>
+
+          <div class="messages" id="messages-container">
+            <div class="msg">
+              <div class="avatar sm av2">JM</div>
+              <div class="bubble">
+                <div class="msg-meta"><span class="sender">Jess Moore</span><span class="time">9:14 AM</span></div>
+                <div class="msg-text">Hey everyone — just uploaded the updated system design doc. Take a look before our standup at 11am. I made changes to the database schema section based on Ryan's feedback.</div>
+              </div>
+            </div>
+            <div class="msg">
+              <div class="avatar sm av3">RP</div>
+              <div class="bubble">
+                <div class="msg-meta"><span class="sender">Ryan Patel</span><span class="time">9:22 AM</span></div>
+                <div class="msg-text">Thanks Jess! The schema looks much cleaner now. I finished the API endpoint design — moved it to Completed on the task board.</div>
+                <div class="file-attach">📎 api_endpoints_v1.pdf <span style="margin-left:auto;color:var(--text3)">124 KB</span></div>
+              </div>
+            </div>
+            <div class="msg">
+              <div class="avatar sm av4">SO</div>
+              <div class="bubble">
+                <div class="msg-meta"><span class="sender">Sara O'Brien</span><span class="time">9:35 AM</span></div>
+                <div class="msg-text">Great work Ryan! I'm starting on the database implementation today. Should be done by tomorrow. Alex — can you review the wireframes I added to the Files section?</div>
+              </div>
+            </div>
+            <div class="msg own">
+              <div class="avatar sm av1">AC</div>
+              <div class="bubble">
+                <div class="msg-meta"><span class="sender">You</span><span class="time">9:41 AM</span></div>
+                <div class="msg-text">On it Sara! Also — reminder that the System Design Report is due Thursday. Let's all make sure our sections are finalised by Wednesday EOD so we have time to review.</div>
+              </div>
+            </div>
+            <div class="msg">
+              <div class="avatar sm av2">JM</div>
+              <div class="bubble">
+                <div class="msg-meta"><span class="sender">Jess Moore</span><span class="time">9:44 AM</span></div>
+                <div class="msg-text">Agreed. I'll also create a checklist task for the final review. See you all at standup 👍</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-input-area">
+            <div class="chat-toolbar">
+              <div class="icon-btn" title="Attach file" onclick="showToast('File attached!')">📎</div>
+              <div class="icon-btn" title="Emoji">😊</div>
+            </div>
+            <textarea class="chat-input" id="chat-input" placeholder="Message #general… (Press Enter to send)" rows="1" onkeydown="handleChatKey(event)"></textarea>
+            <div class="send-btn" onclick="sendMsg()" title="Send">➤</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TASKS PAGE ── -->
+      <div id="page-tasks" class="page">
+        <div style="margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+          <div style="flex:1;font-size:12px;color:var(--text2);">Drag tasks between columns to update status. Click a task to view details.</div>
+          <button class="btn-sm btn-accent" onclick="openNewTask()">+ New Task</button>
+        </div>
+        <div class="kanban">
+
+          <!-- To Do -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="col-dot" style="background:#94a3b8;"></div>
+              <span class="col-label">To Do</span>
+              <span class="col-count">3</span>
+            </div>
+            <div class="task-cards">
+              <div class="task-card" onclick="openTask('Write Literature Review', 'Research and summarise 10+ relevant papers for the introduction section of the report.', 'Tom Nguyen', 'Mar 17', 'High', 'todo')">
+                <span class="task-tag priority-high">High</span>
+                <div class="task-title">Write Literature Review</div>
+                <div class="task-desc">Research and summarise 10+ relevant papers for the introduction section.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av5">TN</div>
+                  <div class="task-due">Due Mar 17</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('UI Wireframe Revisions', 'Revise wireframes based on feedback from the last team review session.', 'Sara O\'Brien', 'Mar 18', 'Medium', 'todo')">
+                <span class="task-tag priority-med">Medium</span>
+                <div class="task-title">UI Wireframe Revisions</div>
+                <div class="task-desc">Revise wireframes based on team review feedback.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av4">SO</div>
+                  <div class="task-due">Due Mar 18</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('Set Up Testing Environment', 'Configure Jest and set up CI pipeline for automated unit tests.', 'Ryan Patel', 'Mar 22', 'Low', 'todo')">
+                <span class="task-tag priority-low">Low</span>
+                <div class="task-title">Set Up Testing Environment</div>
+                <div class="task-desc">Configure Jest and CI pipeline for automated tests.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av3">RP</div>
+                  <div class="task-due">Due Mar 22</div>
+                </div>
+              </div>
+            </div>
+            <button class="add-task-btn" onclick="openNewTask()">+ Add task</button>
+          </div>
+
+          <!-- In Progress -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="col-dot" style="background:#2563a8;"></div>
+              <span class="col-label">In Progress</span>
+              <span class="col-count">3</span>
+            </div>
+            <div class="task-cards">
+              <div class="task-card" onclick="openTask('System Design Report', 'Write the complete system architecture section including class diagrams, sequence diagrams, and component overview.', 'Jess Moore', 'Mar 14', 'High', 'inprogress')">
+                <span class="task-tag priority-high">High</span>
+                <div class="task-title">System Design Report</div>
+                <div class="task-desc">Write architecture section including class and sequence diagrams.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av2">JM</div>
+                  <div class="task-due" style="color:#dc2626;">⚠ Mar 14</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('Database Implementation', 'Implement PostgreSQL schema and seed data. Set up ORM models and migration scripts.', 'Sara O\'Brien', 'Mar 17', 'High', 'inprogress')">
+                <span class="task-tag priority-high">High</span>
+                <div class="task-title">Database Implementation</div>
+                <div class="task-desc">Implement PostgreSQL schema, ORM models and migration scripts.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av4">SO</div>
+                  <div class="task-due">Due Mar 17</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('Frontend Component Library', 'Build reusable React components for the project UI based on approved wireframes.', 'Alex Chen', 'Mar 20', 'Medium', 'inprogress')">
+                <span class="task-tag priority-med">Medium</span>
+                <div class="task-title">Frontend Component Library</div>
+                <div class="task-desc">Build reusable React components from approved wireframes.</div>
+                <div class="task-footer">
+                  <div class="avatar xs av1">AC</div>
+                  <div class="task-due">Due Mar 20</div>
+                </div>
+              </div>
+            </div>
+            <button class="add-task-btn" onclick="openNewTask()">+ Add task</button>
+          </div>
+
+          <!-- Completed -->
+          <div class="kanban-col">
+            <div class="kanban-col-header">
+              <div class="col-dot" style="background:#2d6a4f;"></div>
+              <span class="col-label">Completed</span>
+              <span class="col-count">3</span>
+            </div>
+            <div class="task-cards">
+              <div class="task-card" onclick="openTask('API Endpoint Design', 'Design and document all REST API endpoints for the backend service.', 'Ryan Patel', 'Mar 10', 'High', 'done')" style="opacity:0.72;">
+                <span class="task-tag priority-high">High</span>
+                <div class="task-title" style="text-decoration:line-through;opacity:0.7;">API Endpoint Design</div>
+                <div class="task-footer">
+                  <div class="avatar xs av3">RP</div>
+                  <div class="task-due">✓ Mar 10</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('Project Requirements Doc', 'Write the full requirements specification document for sign-off.', 'Alex Chen', 'Mar 8', 'High', 'done')" style="opacity:0.72;">
+                <span class="task-tag priority-high">High</span>
+                <div class="task-title" style="text-decoration:line-through;opacity:0.7;">Project Requirements Doc</div>
+                <div class="task-footer">
+                  <div class="avatar xs av1">AC</div>
+                  <div class="task-due">✓ Mar 8</div>
+                </div>
+              </div>
+              <div class="task-card" onclick="openTask('Team Meeting Setup', 'Create recurring calendar invite and agenda template for weekly standups.', 'Jess Moore', 'Mar 6', 'Low', 'done')" style="opacity:0.72;">
+                <span class="task-tag priority-low">Low</span>
+                <div class="task-title" style="text-decoration:line-through;opacity:0.7;">Team Meeting Setup</div>
+                <div class="task-footer">
+                  <div class="avatar xs av2">JM</div>
+                  <div class="task-due">✓ Mar 6</div>
+                </div>
+              </div>
+            </div>
+            <button class="add-task-btn" onclick="openNewTask()">+ Add task</button>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── FILES PAGE ── -->
+      <div id="page-files" class="page">
+        <div class="upload-zone" onclick="showToast('File upload dialog opened')">
+          <div class="upload-icon">⬆</div>
+          <p>Drop files here or click to upload</p>
+          <small>Supports PDF, DOCX, XLSX, PPTX, ZIP — max 50MB per file</small>
+        </div>
+        <div style="margin-bottom:16px;display:flex;align-items:center;gap:10px;">
+          <div style="font-size:13px;font-weight:600;flex:1;">All Files <span style="color:var(--text3);font-weight:400;">— 6 files</span></div>
+          <button class="btn-sm btn-outline" onclick="showToast('Sorted!')">Sort by date ▾</button>
+        </div>
+        <div class="files-grid">
+          <div class="file-card">
+            <div class="file-icon pdf">📄</div>
+            <div class="file-name">system_design_v2.pdf</div>
+            <div class="file-meta">1.4 MB · Updated 10 min ago</div>
+            <div class="file-uploader"><div class="avatar xs av2">JM</div> Jess Moore</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+              <button class="file-action-btn" style="background:var(--surface2);color:var(--text2);" onclick="showToast('Preview opened')">Preview</button>
+            </div>
+          </div>
+          <div class="file-card">
+            <div class="file-icon pdf">📄</div>
+            <div class="file-name">api_endpoints_v1.pdf</div>
+            <div class="file-meta">340 KB · Updated 42 min ago</div>
+            <div class="file-uploader"><div class="avatar xs av3">RP</div> Ryan Patel</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+              <button class="file-action-btn" style="background:var(--surface2);color:var(--text2);" onclick="showToast('Preview opened')">Preview</button>
+            </div>
+          </div>
+          <div class="file-card">
+            <div class="file-icon doc">📝</div>
+            <div class="file-name">requirements_spec.docx</div>
+            <div class="file-meta">280 KB · Updated Mar 8</div>
+            <div class="file-uploader"><div class="avatar xs av1">AC</div> Alex Chen</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+              <button class="file-action-btn" style="background:var(--surface2);color:var(--text2);" onclick="showToast('Preview opened')">Preview</button>
+            </div>
+          </div>
+          <div class="file-card">
+            <div class="file-icon ppt">📊</div>
+            <div class="file-name">wireframes_v3.pptx</div>
+            <div class="file-meta">3.2 MB · Updated Mar 9</div>
+            <div class="file-uploader"><div class="avatar xs av4">SO</div> Sara O'Brien</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+              <button class="file-action-btn" style="background:var(--surface2);color:var(--text2);" onclick="showToast('Preview opened')">Preview</button>
+            </div>
+          </div>
+          <div class="file-card">
+            <div class="file-icon xls">📋</div>
+            <div class="file-name">project_timeline.xlsx</div>
+            <div class="file-meta">96 KB · Updated Mar 7</div>
+            <div class="file-uploader"><div class="avatar xs av1">AC</div> Alex Chen</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+              <button class="file-action-btn" style="background:var(--surface2);color:var(--text2);" onclick="showToast('Preview opened')">Preview</button>
+            </div>
+          </div>
+          <div class="file-card">
+            <div class="file-icon zip">🗜</div>
+            <div class="file-name">codebase_backup_mar10.zip</div>
+            <div class="file-meta">18 MB · Updated Mar 10</div>
+            <div class="file-uploader"><div class="avatar xs av3">RP</div> Ryan Patel</div>
+            <div class="file-actions">
+              <button class="file-action-btn dl" onclick="showToast('Downloading...')">⬇ Download</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </main>
+</div><!-- /app-screen -->
+
+<!-- ═══════════════════════════════════════════
+     AI SUMMARY MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="ai-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span style="font-size:22px;">✦</span>
+      <h2>AI Meeting Summary</h2>
+      <div class="modal-close" onclick="closeModal('ai-modal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="ai-badge">Powered by GroupSync AI</div>
+
+      <div id="ai-input-section">
+        <div class="ai-input-label">Paste your meeting notes or chat transcript below</div>
+        <textarea class="ai-textarea" id="ai-input" placeholder="e.g. Today we discussed the system design report due Thursday. Jess will finalise the architecture section. Ryan confirmed the API endpoints are done. Sara is starting the database today. Alex will review wireframes..."></textarea>
+        <button class="ai-generate-btn" id="ai-gen-btn" onclick="generateSummary()">
+          <div class="spinner" id="ai-spinner"></div>
+          <span id="ai-btn-text">✦ Generate Summary</span>
+        </button>
+      </div>
+
+      <div id="ai-result" style="display:none;margin-top:20px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;">
+          <span style="font-size:13px;font-weight:600;color:var(--text2);">Summary generated</span>
+          <span style="font-size:11px;color:var(--text3);">· Today, 9:48 AM</span>
+          <button class="btn-sm btn-outline" style="margin-left:auto;" onclick="showToast('Summary copied!')">Copy</button>
+          <button class="btn-sm btn-accent" onclick="showToast('Summary saved to files!')">Save</button>
+        </div>
+
+        <div class="summary-section">
+          <h3>📋 Key Discussion Points</h3>
+          <ul>
+            <li>System Design Report is due Thursday 14 March — sections must be finalised by Wednesday EOD for review time</li>
+            <li>Updated system design doc (v2) shared by Jess, incorporating Ryan's schema feedback</li>
+            <li>Database schema section was restructured for clarity and consistency with API design</li>
+            <li>Frontend component library work is underway based on approved wireframes</li>
+          </ul>
+        </div>
+
+        <div class="summary-section">
+          <h3>⚡ Action Items</h3>
+          <ul>
+            <li class="action-item"><strong>Jess Moore</strong> — Finalise architecture and class diagram section of System Design Report by Wed Mar 13</li>
+            <li class="action-item"><strong>Sara O'Brien</strong> — Complete database implementation (PostgreSQL schema + ORM) by Mar 17</li>
+            <li class="action-item"><strong>Alex Chen</strong> — Review wireframes in Files section and provide feedback by EOD today</li>
+            <li class="action-item"><strong>Tom Nguyen</strong> — Begin literature review research; target 10 papers by Mar 15</li>
+          </ul>
+        </div>
+
+        <div class="summary-section">
+          <h3>✅ Decisions Made</h3>
+          <ul>
+            <li>Using PostgreSQL as the primary database (confirmed by team)</li>
+            <li>All report sections due Wednesday 13 March for group review before submission</li>
+            <li>Jess to create a checklist task for the final group review process</li>
+          </ul>
+        </div>
+
+        <div style="padding:12px;background:var(--yellow-light);border-radius:var(--radius-sm);border:1px solid #f0d080;margin-top:4px;">
+          <div style="font-size:11px;font-weight:700;color:var(--yellow);margin-bottom:4px;">⚠ Upcoming Reminder</div>
+          <div style="font-size:12px;color:var(--text);">System Design Report deadline is in <strong>2 days</strong>. Review progress on the Task Board.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     TASK DETAIL MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="task-modal">
+  <div class="modal task-modal" style="width:540px;">
+    <div class="modal-header">
+      <span style="font-size:18px;">☑</span>
+      <h2 id="task-modal-title">Task Detail</h2>
+      <div class="modal-close" onclick="closeModal('task-modal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="task-meta-row">
+        <div class="task-meta-item">
+          <div class="label">Assigned to</div>
+          <div class="value" id="task-assignee">—</div>
+        </div>
+        <div class="task-meta-item">
+          <div class="label">Due date</div>
+          <div class="value" id="task-due">—</div>
+        </div>
+        <div class="task-meta-item">
+          <div class="label">Priority</div>
+          <div class="value" id="task-priority">—</div>
+        </div>
+        <div class="task-meta-item">
+          <div class="label">Status</div>
+          <select class="status-select" id="task-status" onchange="showToast('Status updated!')">
+            <option value="todo">To Do</option>
+            <option value="inprogress">In Progress</option>
+            <option value="done">Completed</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;" id="task-desc-text">Description here</div>
+      <div class="divider"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:10px;">COMMENTS</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:12px;">
+        <div class="msg">
+          <div class="avatar sm av2">JM</div>
+          <div class="bubble">
+            <div class="msg-meta"><span class="sender">Jess Moore</span><span class="time">Yesterday</span></div>
+            <div class="msg-text">I'll have my section done by Tuesday. Just need to finish the sequence diagram.</div>
+          </div>
+        </div>
+      </div>
+      <div class="comment-area">
+        <div class="avatar sm av1">AC</div>
+        <input class="comment-input" placeholder="Add a comment…" onkeydown="if(event.key==='Enter'){showToast('Comment added!');this.value='';}">
+        <button class="btn-sm btn-accent" onclick="showToast('Comment added!')">Post</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     NEW TASK MODAL
+═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="new-task-modal">
+  <div class="modal" style="width:480px;">
+    <div class="modal-header">
+      <span style="font-size:18px;">+</span>
+      <h2>New Task</h2>
+      <div class="modal-close" onclick="closeModal('new-task-modal')">✕</div>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Task Title</label>
+        <input type="text" placeholder="e.g. Write unit tests for login module" id="new-task-title">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="ai-textarea" style="min-height:70px;" placeholder="Describe what needs to be done..."></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+        <div class="form-group">
+          <label>Assign to</label>
+          <select class="status-select" style="width:100%">
+            <option>Alex Chen</option>
+            <option>Jess Moore</option>
+            <option>Ryan Patel</option>
+            <option>Sara O'Brien</option>
+            <option>Tom Nguyen</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Priority</label>
+          <select class="status-select" style="width:100%">
+            <option>High</option>
+            <option>Medium</option>
+            <option>Low</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" style="width:100%;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--radius-sm);font-family:'Sora',sans-serif;font-size:12px;background:var(--surface2);outline:none;">
+        </div>
+      </div>
+      <button class="btn-primary" style="margin-top:8px;" onclick="closeModal('new-task-modal');showToast('Task created!')">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── NAVIGATION ──
+function doLogin() {
+  document.getElementById('login-screen').classList.remove('active');
+  document.getElementById('app-screen').classList.add('active');
+}
+function doLogout() {
+  document.getElementById('app-screen').classList.remove('active');
+  document.getElementById('login-screen').classList.add('active');
+}
+
+const pageTitles = {
+  dashboard: 'Dashboard',
+  chat: 'Group Chat',
+  tasks: 'Task Board',
+  files: 'Files'
+};
+
+function navTo(page, el) {
+  // update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else {
+    document.querySelectorAll('.nav-item').forEach(n => {
+      if (n.textContent.trim().toLowerCase().startsWith(page === 'dashboard' ? '⊞' : page === 'chat' ? '💬' : page === 'tasks' ? '☑' : '📁')) {
+        n.classList.add('active');
+      }
+    });
+  }
+  // update page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('page-title').textContent = pageTitles[page] || 'GroupSync';
+}
+
+// ── CHAT ──
+function sendMsg() {
+  const input = document.getElementById('chat-input');
+  const text = input.value.trim();
+  if (!text) return;
+  const container = document.getElementById('messages-container');
+  const now = new Date();
+  const time = now.getHours() + ':' + String(now.getMinutes()).padStart(2,'0');
+  const msg = document.createElement('div');
+  msg.className = 'msg own';
+  msg.innerHTML = `
+    <div class="avatar sm av1">AC</div>
+    <div class="bubble">
+      <div class="msg-meta"><span class="sender">You</span><span class="time">${time} AM</span></div>
+      <div class="msg-text">${text}</div>
+    </div>`;
+  container.appendChild(msg);
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+}
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+// ── MODALS ──
+function openAISummary() {
+  document.getElementById('ai-modal').classList.add('open');
+  document.getElementById('ai-result').style.display = 'none';
+  document.getElementById('ai-input-section').style.display = 'block';
+  document.getElementById('ai-input').value = '';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+function generateSummary() {
+  const input = document.getElementById('ai-input').value.trim();
+  const btn = document.getElementById('ai-gen-btn');
+  const spinner = document.getElementById('ai-spinner');
+  const btnText = document.getElementById('ai-btn-text');
+
+  spinner.style.display = 'inline-block';
+  btnText.textContent = 'Analysing…';
+  btn.disabled = true;
+
+  setTimeout(() => {
+    spinner.style.display = 'none';
+    btnText.textContent = '✦ Generate Summary';
+    btn.disabled = false;
+    document.getElementById('ai-input-section').style.display = 'none';
+    document.getElementById('ai-result').style.display = 'block';
+  }, 2200);
+}
+
+function openTask(title, desc, assignee, due, priority, status) {
+  document.getElementById('task-modal-title').textContent = title;
+  document.getElementById('task-assignee').textContent = assignee;
+  document.getElementById('task-due').textContent = due;
+  document.getElementById('task-priority').textContent = priority;
+  document.getElementById('task-desc-text').textContent = desc;
+  document.getElementById('task-status').value = status;
+  document.getElementById('task-modal').classList.add('open');
+}
+function openNewTask() {
+  document.getElementById('new-task-modal').classList.add('open');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// Click outside modal to close
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
