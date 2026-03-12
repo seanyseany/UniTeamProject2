@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UniGroup - Group A Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <header class="main-header">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+                <span class="logo-text">UniGroup</span>
+            </div>
+            <div class="header-actions">
+                <button class="icon-btn"><i class="fas fa-search"></i></button>
+                <button class="icon-btn badge"><i class="fas fa-bell"></i></button>
+                <div class="user-avatar" title="Jane Doe">JD</div>
+            </div>
+        </header>
+
+        <nav class="main-nav">
+            <ul>
+                <li class="active" data-section="dashboard"><i class="fas fa-columns"></i> Group Dashboard</li>
+                <li data-section="chat"><i class="fas fa-comments"></i> Group Chat</li>
+                <li data-section="board"><i class="fas fa-tasks"></i> Task Board (Kanban)</li>
+                <li data-section="files"><i class="fas fa-folder-open"></i> File Sharing</li>
+                <li data-section="ai"><i class="fas fa-robot"></i> AI Meeting Summaries</li>
+                <li data-section="members"><i class="fas fa-users"></i> Group Members</li>
+            </ul>
+        </nav>
+
+        <main class="content-wrapper">
+            
+            <section id="dashboard-section" class="content-section active">
+                <h1 class="page-title">Group Dashboard</h1>
+
+                <div class="dashboard-grid">
+                    
+                    <div class="card project-overview">
+                        <h2>Marketing Group A - Final Assignment</h2>
+                        <div class="progress-container">
+                            <span class="progress-text">55% Complete</span>
+                            <div class="progress-bar"><div class="progress-fill"></div></div>
+                        </div>
+                        <p class="project-desc">This is the communication platform for our final case study on university collaboration tools.</p>
+                        <p class="next-deadline">Next Deadline: <strong>Nov 15th</strong></p>
+                    </div>
+
+                    <div class="card your-tasks">
+                        <h2><i class="fas fa-star text-accent"></i> Your Focus Tasks</h2>
+                        <ul class="task-list">
+                            <li><input type="checkbox"> <span>Draft Executive Summary</span> <span class="due-date">Due 15th</span></li>
+                            <li><input type="checkbox"> <span>Review Market Research</span> <span class="due-date">Due 15th</span></li>
+                            <li><input type="checkbox"> <span>Review Market Research</span> <span class="due-date">Due 15th</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="card board-preview span-rows">
+                        <div class="card-header">
+                            <h2>Task Board Overview (Kanban)</h2>
+                            <button class="add-task-btn">+ Add Task</button>
+                        </div>
+                        
+                        <div class="kanban-preview">
+                            <div class="kb-col">
+                                <h3>To Do</h3>
+                                <div class="task-card-mini">Draft Summary</div>
+                                <div class="task-card-mini">Intro Slides</div>
+                            </div>
+                            <div class="kb-col">
+                                <h3>In Progress</h3>
+                                <div class="task-card-mini">Case Study Analysis</div>
+                                <div class="task-card-mini">User Surveys</div>
+                                <div class="task-card-mini">Competitor Research</div>
+                            </div>
+                            <div class="kb-col">
+                                <h3>Done</h3>
+                                <div class="task-card-mini complete">Group Plan</div>
+                                <div class="task-card-mini complete">Research Objectives</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card activity-feed">
+                        <h2>Recent Activity Feed</h2>
+                        <ul class="feed-list">
+                            <li><i class="fas fa-comment"></i> Sarah posted in Chat <span class="time">10 mins ago</span></li>
+                            <li><i class="fas fa-file-upload"></i> John uploaded 'Draft v2' <span class="time">2 hrs ago</span></li>
+                            <li><i class="fas fa-robot"></i> AI generated a new meeting summary <span class="time">1 day ago</span></li>
+                        </ul>
+                    </div>
+
+                    <div class="card ai-summary">
+                        <h2><i class="fas fa-robot text-accent"></i> Latest AI Summary - Nov 5th</h2>
+                        <h3>Week 4 Project Sync</h3>
+                        <p><strong>Key Decisions:</strong> Project draft summary, perform market development project.</p>
+                        <button class="view-btn">View All Summaries</button>
+                    </div>
+
+                </div>
+            </section>
+
+            <section id="chat-section" class="content-section">
+                <h1>Group Chat</h1>
+                <div class="placeholder-content">Real-time messaging UI goes here.</div>
+            </section>
+
+            <section id="board-section" class="content-section">
+                <h1>Task Management Board</h1>
+                <div class="placeholder-content">Full-screen Jira/Trello board view goes here.</div>
+            </section>
+
+            <section id="files-section" class="content-section">
+                <h1>File Sharing</h1>
+                <div class="placeholder-content">File upload/download interface goes here.</div>
+            </section>
+
+            <section id="ai-section" class="content-section">
+                <h1>AI Meeting Summaries</h1>
+                <div class="placeholder-content">Full meeting transcripts and AI output.</div>
+            </section>
+
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
