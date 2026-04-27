@@ -4,16 +4,23 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:https": "node server.mjs",
     "build": "next build",
     "start": "next start",
+    "start:https": "NODE_ENV=production node server.mjs",
     "lint": "next lint"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
+    "better-sqlite3": "^12.9.0",
+    "jose": "^6.2.2",
     "next": "15.2.4",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/better-sqlite3": "^7.6.13",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "@types/react-dom": "19.0.4",
