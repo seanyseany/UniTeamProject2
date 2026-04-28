@@ -411,6 +411,34 @@ export default function Page() {
     return unlockedKey;
   }
 
+  async function bootstrapE2EEForCurrentUser(passwordValue: string) {
+    const generatedKeys = await generateUserKeyMaterial(passwordValue);
+
+    await apiRequest<{ keyMaterial: UserKeyMaterial }>('/api/e2ee/me', {
+      method: 'POST',
+      body: JSON.stringify(generatedKeys.bundle),
+    });
+
+    setPrivateKey(generatedKeys.privateKey);
+    setInfo('A new encrypted chat key was created automatically for this existing account.');
+    return generatedKeys.privateKey;
+  }
+
+  async function unlockOrBootstrapE2EE(passwordValue: string) {
+    const payload = await apiRequest<{ keyMaterial: UserKeyMaterial | null }>('/api/e2ee/me', {
+      method: 'GET',
+    });
+
+    if (!payload.keyMaterial) {
+      return bootstrapE2EEForCurrentUser(passwordValue);
+    }
+
+    const unlockedKey = await unlockPrivateKey(payload.keyMaterial, passwordValue);
+    setPrivateKey(unlockedKey);
+    setInfo('E2EE keys unlocked for this session.');
+    return unlockedKey;
+  }
+
   async function ensureUnlockedPrivateKey() {
     if (privateKey) {
       return privateKey;
@@ -421,7 +449,7 @@ export default function Page() {
       throw new Error('Encrypted chat remains locked until you unlock it.');
     }
 
-    return unlockE2EE(promptedPassword);
+    return unlockOrBootstrapE2EE(promptedPassword);
   }
 
   async function loadGroups() {
@@ -716,7 +744,7 @@ export default function Page() {
           body: JSON.stringify({ email, password }),
         });
 
-        const unlockedKey = await unlockE2EE(password);
+        const unlockedKey = await unlockOrBootstrapE2EE(password);
         setPrivateKey(unlockedKey);
         setUser(payload.user);
       }
